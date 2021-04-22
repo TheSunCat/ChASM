@@ -69,7 +69,7 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+I"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Import..."/>
+                <Property name="text" type="java.lang.String" value="Import Binary"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="itmImportActionPerformed"/>
@@ -80,7 +80,7 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+E"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Export..."/>
+                <Property name="text" type="java.lang.String" value="Export Binary"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="itmExportActionPerformed"/>
@@ -100,7 +100,7 @@
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="&quot;Autosave Code - &quot; + Settings.autoSave" type="code"/>
+                  <Connection code="&quot;Save session - &quot; + Settings.autoSave" type="code"/>
                 </Property>
               </Properties>
               <Events>
@@ -111,7 +111,7 @@
               <Properties>
                 <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                  <Connection code="&quot;Syntax Highlighting - &quot; + Settings.syntaxHighlight" type="code"/>
+                  <Connection code="&quot;Syntax highlighting - &quot; + Settings.syntaxHighlight" type="code"/>
                 </Property>
               </Properties>
               <Events>

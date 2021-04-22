@@ -6,20 +6,14 @@ import javax.swing.*;
 
 public class ChASM {
 
-    public static void main(String[] args)
-            throws java.io.IOException, java.awt.FontFormatException,
-            InterruptedException, java.lang.reflect.InvocationTargetException {
-        
-        SwingUtilities.invokeAndWait(() -> {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
             try {
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                 
                 new CasmEditorForm().setVisible(true);
-                
-            } catch (ClassNotFoundException | InstantiationException
-                    | IllegalAccessException | UnsupportedLookAndFeelException
-                    | java.io.IOException | java.awt.FontFormatException ex) {
-                ex.printStackTrace();
+            } catch (Exception ex) {
+                throw new RuntimeException(ex);
             }
         });
     }
@@ -32,7 +26,7 @@ public class ChASM {
         put(0x03, new Instruction(0x03, "MUL", "r1"   , "r2", "rOut"               ));
         put(0x04, new Instruction(0x04, "RGT", "r1"   , "r2", "rOut"               ));
         put(0x05, new Instruction(0x05, "LFT", "r1"   , "r2", "rOut"               ));
-        put(0x06, new Instruction(0x06, "LBL", "lId"  , "sAddress"                  ));
+        put(0x06, new Instruction(0x06, "LBL", "lId"  , "sAddress"                 ));
         put(0x07, new Instruction(0x07, "JMP", "lId"                               ));
         put(0x08, new Instruction(0x08, "JIF", "lId"  , "#CompType"                ));
         put(0x09, new Instruction(0x09, "MOV", "rTo"  , "#Val"                     ));

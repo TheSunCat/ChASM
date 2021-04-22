@@ -2,6 +2,7 @@ package chasm.compiler;
 
 import java.util.*;
 
+// huge thanks to Jack Crenshaws's "Let's Build a Compiler" series, which this is heavily based on.
 public class ThreadedCompiler {
 
     private char look, token;
@@ -31,7 +32,10 @@ public class ThreadedCompiler {
     }
     
     public boolean compiling() {
-        return compThread == null ? false : compThread.isAlive();
+        if(compThread == null)
+            return false;
+        else
+            return compThread.isAlive();
     }
     
     private void compileOnCurrentThread(String code) {

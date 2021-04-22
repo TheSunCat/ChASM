@@ -33,7 +33,7 @@ public class Assembler {
     
     public static byte[] getByteCode() {
         if(t == null || t.isAlive()) {
-            System.err.println("Did not wait for assembler...");
+            System.err.println("Did not wait for assembler to finish...");
             return null;
         }
         
@@ -52,18 +52,30 @@ public class Assembler {
          * First Pass - Move all LBLs to the beginning.
          **************************************************/
         
+        int lblCount = 0;
+        while(index + 1  < text.length()) {
+            Instruction curInst = parseInstruction();
+            
+            if(curInst.id == (byte) 0xFF) {
+                lblCount++;
+            }
+        }
+        
+        instructions.clear();
+        c = ' ';
+        index = -1;
+        getChar();
+        
         String topLbls = "";
         ArrayList<Instruction> pastInsts = new ArrayList();
         
         while(index + 1  < text.length()) {
             int startIndex = index;
-            Instruction curInst = instruction();
+            Instruction curInst = parseInstruction();
             int instSize = index - startIndex;
             
-            pastInsts.add(curInst);
-            
             if(curInst.id == (byte) 0xFF) {
-                topLbls += "LBL(L" + curInst.args[0].getValue() + ",#" + sizeOf(pastInsts) + ")";
+                topLbls += "LBL(L" + curInst.args[0].getValue() + ",#" + (sizeOf(pastInsts) + (lblCount * 4)) + ")";
                 
                 // cut out the special lbl instruction
                 index -= instSize;
@@ -71,6 +83,8 @@ public class Assembler {
                 String text2 = text.substring(index + instSize, text.length());
                 
                 text = text1 + text2;
+            } else {
+                pastInsts.add(curInst);
             }
         }
         
@@ -89,7 +103,7 @@ public class Assembler {
         
         // parse the instruction from the current line
         while(c != '.' && index < text.length()) {
-            instructions.add(instruction());
+            instructions.add(parseInstruction());
         }
 
         /**********************
@@ -123,7 +137,7 @@ public class Assembler {
         
         for(Instruction inst : insts) {
             if(inst.id == (byte) 0xFF)
-                size += 4; // special lbl instruction
+                System.err.println("Encountered fake LBL in sizeOf. This should not happen, LBL addresses will be INCORRECT.");//size += 4; // special lbl instruction
             else
                 size += inst.toByteCode().size();
         }
@@ -203,7 +217,7 @@ public class Assembler {
     }
     
     /** Parse an instruction from a line of text. **/
-    private static Instruction instruction() {
+    private static Instruction parseInstruction() {
         ArrayList<Argument> arguments = new ArrayList();
         
         // get instruction name

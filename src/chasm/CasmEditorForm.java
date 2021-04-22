@@ -18,7 +18,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
     String localPath = java.nio.file.FileSystems
             .getDefault().getPath(".").toAbsolutePath().toString();
     
-    public CasmEditorForm() throws IOException, FontFormatException {
+    public CasmEditorForm() {
         Settings.init();
         
         initComponents();
@@ -38,35 +38,40 @@ public class CasmEditorForm extends javax.swing.JFrame {
         saveTimer.setRepeats(false);
         
         // Load autosaved file
-        File f = new File(System.getenv("AppData") + "\\ChASM\\session");
+        File f = new File(System.getProperty("user.home") + "/.ChASM/session");
         
         if(Settings.autoSave && f.exists()) {
-            byte[] b = Files.readAllBytes(f.toPath());
-            
-            String str = new String(b, "UTF-8");
-            
-            int headLen = str.charAt(0);
-            
-            int caret = 0;
-            
-            if(!(headLen < 1 || headLen > 5)) {
-                for(int i = 1; i < headLen; i++) {
-                    char c = str.charAt(i);
-
-                    caret |= ((c & 0xFF) << 8 * (i - 1));
-                }
+            try {
+                byte[] b = Files.readAllBytes(f.toPath());
                 
-                if(caret > str.length() - headLen)
-                    caret = str.length() - headLen;
-
-                editor.setText(str.substring(headLen));
-                editor.setCaretPosition(caret);
-
-                change();
-
-                lbStatusBar.setText("Recovered code sucessfully!");
-            } else {
-                System.err.println("Failed to recover code: corrupt header.");
+                String str = new String(b, "UTF-8");
+                
+                int headLen = str.charAt(0);
+                
+                int caret = 0;
+                
+                if(!(headLen < 1 || headLen > 5)) {
+                    for(int i = 1; i < headLen; i++) {
+                        char c = str.charAt(i);
+                        
+                        caret |= ((c & 0xFF) << 8 * (i - 1));
+                    }
+                    
+                    if(caret > str.length() - headLen)
+                        caret = str.length() - headLen;
+                    
+                    editor.setText(str.substring(headLen));
+                    editor.setCaretPosition(caret);
+                    
+                    change();
+                    
+                    lbStatusBar.setText("Recovered code sucessfully!");
+                } else {
+                    System.err.println("Failed to recover code: corrupt header.");
+                    lbStatusBar.setText("Failed to recover code: corrupt header.");
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(CasmEditorForm.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
@@ -260,9 +265,9 @@ public class CasmEditorForm extends javax.swing.JFrame {
     private void autoSave() {
         if(unsavedChanges && Settings.autoSave) {
             try {
-                File appData = new File(System.getenv("AppData") + "\\ChASM");
-                if(!appData.exists())
-                    appData.mkdir();
+                File saveDir = new File(System.getProperty("user.home") + "/.ChASM");
+                if(!saveDir.exists())
+                    saveDir.mkdir();
                 
                 String str = editor.getText();
                 
@@ -297,7 +302,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
                     byteArray[i + bytes.size()] = (byte) str.charAt(i);
                 }
 
-                new FileOutputStream(new File(appData + "\\session")).write(byteArray);
+                new FileOutputStream(new File(saveDir + "/session")).write(byteArray);
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
@@ -413,7 +418,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         mnuFile.setForeground(new java.awt.Color(255, 255, 255));
         mnuFile.setText("File");
 
-        itmNew.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
+        itmNew.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         itmNew.setText("New");
         itmNew.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -422,7 +427,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         });
         mnuFile.add(itmNew);
 
-        itmOpen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        itmOpen.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         itmOpen.setText("Open");
         itmOpen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -431,7 +436,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         });
         mnuFile.add(itmOpen);
 
-        itmSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        itmSave.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_DOWN_MASK));
         itmSave.setText("Save");
         itmSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -440,7 +445,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         });
         mnuFile.add(itmSave);
 
-        itmSaveAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        itmSaveAs.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_DOWN_MASK | java.awt.event.InputEvent.CTRL_DOWN_MASK));
         itmSaveAs.setText("Save As...");
         itmSaveAs.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -449,8 +454,8 @@ public class CasmEditorForm extends javax.swing.JFrame {
         });
         mnuFile.add(itmSaveAs);
 
-        itmImport.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
-        itmImport.setText("Import...");
+        itmImport.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itmImport.setText("Import Binary");
         itmImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itmImportActionPerformed(evt);
@@ -458,8 +463,8 @@ public class CasmEditorForm extends javax.swing.JFrame {
         });
         mnuFile.add(itmImport);
 
-        itmExport.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
-        itmExport.setText("Export...");
+        itmExport.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_DOWN_MASK));
+        itmExport.setText("Export Binary");
         itmExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itmExportActionPerformed(evt);
@@ -473,7 +478,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         mnuOptions.setText("Options");
 
         itmAutoSave.setSelected(true);
-        itmAutoSave.setText("Autosave Code - " + Settings.autoSave);
+        itmAutoSave.setText("Save session - " + Settings.autoSave);
         itmAutoSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itmAutoSaveActionPerformed(evt);
@@ -482,7 +487,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         mnuOptions.add(itmAutoSave);
 
         itmSyntaxHighlight.setSelected(true);
-        itmSyntaxHighlight.setText("Syntax Highlighting - " + Settings.syntaxHighlight);
+        itmSyntaxHighlight.setText("Syntax highlighting - " + Settings.syntaxHighlight);
         itmSyntaxHighlight.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 itmSyntaxHighlightActionPerformed(evt);
@@ -707,7 +712,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         Settings.autoSave = !Settings.autoSave;
         Settings.save();
         
-        itmAutoSave.setText("Autosave Code - " + Settings.autoSave);
+        itmAutoSave.setText("Save session - " + Settings.autoSave);
     }//GEN-LAST:event_itmAutoSaveActionPerformed
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
@@ -724,7 +729,7 @@ public class CasmEditorForm extends javax.swing.JFrame {
         Settings.syntaxHighlight = !Settings.syntaxHighlight;
         Settings.save();
         
-        itmAutoSave.setText("Syntax Highlighting - " + Settings.syntaxHighlight);
+        itmSyntaxHighlight.setText("Syntax highlighting - " + Settings.syntaxHighlight);
     }//GEN-LAST:event_itmSyntaxHighlightActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
